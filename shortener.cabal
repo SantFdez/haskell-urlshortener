@@ -19,6 +19,7 @@ library
     , scotty >= 0.12
     , text
     , http-types
+    , regex
 
 executable shortener
   import: common

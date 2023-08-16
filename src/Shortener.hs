@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 module Shortener where
 
@@ -14,6 +15,12 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import Web.Scotty
+import Text.RE.Replace
+import Text.RE.TDFA.String
+import Data.Text (pack, unpack)
+
+onlyLetters :: String -> String
+onlyLetters s = replaceAll "" $ s *=~ [re|$([^a-zA-Z])|]
 
 shortener :: IO ()
 shortener = do
@@ -37,7 +44,7 @@ shortener = do
       url <- param "url"
       liftIO $ modifyIORef urlsR $
         \(i, urls) ->
-          (i + 1, M.insert i url urls)
+          (i + 1, M.insert i (pack (onlyLetters (unpack url))) urls)
       redirect "/"
     get "/:n" $ do
       n <- param "n"
