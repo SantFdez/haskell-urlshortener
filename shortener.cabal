@@ -19,7 +19,7 @@ library
     , scotty >= 0.12
     , text
     , http-types
-    , regex
+    , regex-pcre-builtin
 
 executable shortener
   import: common
