@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
 module Shortener where
 
 import Control.Monad.IO.Class (MonadIO(liftIO))
@@ -9,7 +8,7 @@ import Data.Map (Map)
 import qualified Data.Map as M
 import Data.Text (Text)
 import qualified Data.Text.Lazy as LT
-import Network.HTTP.Types (status404)
+import Network.HTTP.Types (status404, status400)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
@@ -45,7 +44,7 @@ shortener = do
             modifyIORef urlsR $
               \(i, urls) ->
                 (i + 1, M.insert i url urls)
-          else raiseStatus status404 "not valid"
+          else raiseStatus status400 "not valid URL"
         )
       redirect "/"
     get "/:n" $ do
