@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-
 module Shortener where
 
 import Control.Monad.IO.Class (MonadIO(liftIO))
@@ -9,11 +8,16 @@ import Data.Map (Map)
 import qualified Data.Map as M
 import Data.Text (Text)
 import qualified Data.Text.Lazy as LT
-import Network.HTTP.Types (status404)
+import Network.HTTP.Types (status404, status400)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import Web.Scotty
+import Text.Regex.PCRE
+import Data.Text (unpack)
+
+isValid :: String -> Bool
+isValid str = str =~ ("^(https?):\\/\\/[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)$" :: String)
 
 shortener :: IO ()
 shortener = do
@@ -35,9 +39,13 @@ shortener = do
                   H.td (H.text url)
     post "/" $ do
       url <- param "url"
-      liftIO $ modifyIORef urlsR $
-        \(i, urls) ->
-          (i + 1, M.insert i url urls)
+      ( if isValid (unpack url)
+          then liftIO $
+            modifyIORef urlsR $
+              \(i, urls) ->
+                (i + 1, M.insert i url urls)
+          else raiseStatus status400 "not valid URL"
+        )
       redirect "/"
     get "/:n" $ do
       n <- param "n"

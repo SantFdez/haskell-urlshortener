@@ -18,6 +18,8 @@ library
     , containers
     , scotty >= 0.12
     , text
+    , http-types
+    , regex-pcre-builtin
 
 executable shortener
   import: common
